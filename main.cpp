@@ -28,19 +28,19 @@ struct Event {
     //Event* prev;
 
     /* Constructor */
-    Event(int a, string b) : event_time(a), event_type(b) {}
+    Event(int a, EVENT_TYPE b) : event_time(a), event_type(b) {}
 };
 
 /* Essentially a double linked list consisting of 'Events'
  * It will be sorted from least to greatest in terms of 'event_time' */
-list<int> GEL;
+list<Event*> GEL;
 
 
 /* To be FIFO. 'Events' get enqueued when the timer reaches the event's
  * specified 'event_time' and(?) if there's another 'Event' already being processed */
 /* Using the queue library provides us with a DS that comes with pop_front and push_back
  * functions to quickly meet the requirements for a FIFO queue */
-queue<Event> buffer;
+queue<Event*> buffer;
 
 int main() {
     /* Initializing */
