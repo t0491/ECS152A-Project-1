@@ -6,20 +6,26 @@
 
 using namespace std;
 
-#define ARRIVAL     "ARRIVAL"
-#define DERPARTURE  "DEPARTURE"
+typedef enum {
+	ARRIVAL = 0,
+	DEPARTURE = 1
+} EVENT_TYPE;
 
 /* Below is just a skeleton and template. Feel free to propose changes
  * or ask any questions. */
 
-struct Event
-{
+struct Event {
     /* We can rename the variables later to be shorter if needed */
+<<<<<<< HEAD
 
     /* Event time is when the packet arrives (ARRIVAL event).
      * Event time is when packet the server is done transmitting the packet (DEPARTURE event). */
     int event_time;
     string event_type;
+=======
+    unsigned int event_time;
+    EVENT_TYPE event_type;
+>>>>>>> 1101a6545662159f6c08f9db6593e6b7c1a19f10
 
     /* As stated in the prompt it should have pointers to the next and previous events */
     /* Temporarily removed since we don't think we need a use for it at the moment. */
