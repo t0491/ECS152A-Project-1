@@ -15,28 +15,31 @@ using namespace std;
 struct Event
 {
     /* We can rename the variables later to be shorter if needed */
+
+    /* Event time is when the packet arrives (ARRIVAL event).
+     * Event time is when packet the server is done transmitting the packet (DEPARTURE event). */
     int event_time;
     string event_type;
 
     /* As stated in the prompt it should have pointers to the next and previous events */
-    Event* next;
-    Event* prev;
+    /* Temporarily removed since we don't think we need a use for it at the moment. */
+    //Event* next;
+    //Event* prev;
+
+    /* Constructor */
+    Event(int a, string b) : event_time(a), event_type(b) {}
 };
 
-struct GEL {
-    /* Essentially a double linked list consisting of 'Events'
-     * It will be sorted from least to greatest in terms of 'event_time' */
-    list<Event> list;
-};
+/* Essentially a double linked list consisting of 'Events'
+ * It will be sorted from least to greatest in terms of 'event_time' */
+list<int> GEL;
 
-struct Queue {
-    /* To be FIFO. 'Events' get enqueued when the timer reaches the event's
-     * specified 'event_time' and(?) if there's another 'Event' already being processed */
 
-    /* Using the queue library provides us with a DS that comes with pop_front and push_back
-     * functions to quickly meet the requirements for a FIFO queue */
-    queue<Event> buffer;
-};
+/* To be FIFO. 'Events' get enqueued when the timer reaches the event's
+ * specified 'event_time' and(?) if there's another 'Event' already being processed */
+/* Using the queue library provides us with a DS that comes with pop_front and push_back
+ * functions to quickly meet the requirements for a FIFO queue */
+queue<Event> buffer;
 
 int main() {
     /* Initializing */
@@ -46,12 +49,17 @@ int main() {
     /* Lambda and mu values are found in the 3.7 Experiment section of the project. */
     unsigned int lambda = 0.1, mu = 1;
 
-    /* Generate the random events and add them to our GEL. */
-    int arrival_time, process_time;
+    /* Generate the random events all as arrival at first. */
+    /* We will handle process + departure time in the main loop. */
+    int arrival_time;
+    Event* event;
     for (int i = 0; i < 1000; ++i) {
-        negative_exponentially_distributed_time(lambda);
-        negative_exponentially_distributed_time(mu);
+        arrival_time = negative_exponentially_distributed_time(lambda);
+
+        /* Construct a new object and push it into the GEL */
+        GEL.emplace_back(arrival_time, ARRIVAL);
     }
+
     /* Base template provided in the prompt
 
     Initialize;
