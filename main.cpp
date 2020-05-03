@@ -3,7 +3,10 @@
 
 #include <iostream>
 #include <string>
+#include <list>
+#include <queue>
 
+using namespace std;
 
 /* Below is just a skeleton and template. Feel free to propose changes
  * or ask any questions. */
@@ -18,21 +21,21 @@ struct Event
     /* We can rename the variables later to be shorter if needed */
     int event_time;
     string event_type;
-
-    /* Stated in the prompt, the events should be linked to one another
-     * I'm assuming it is also going to be a linked list of sorts */
-    Event* next;
-    Event* prev;
 };
 
 struct GEL {
     /* Essentially a double linked list consisting of 'Events'
      * It will be sorted from least to greatest in terms of 'event_time' */
+    list<Event> list;
 };
 
 struct Queue {
     /* To be FIFO. 'Events' get enqueued when the timer reaches the event's
      * specified 'event_time' and(?) if there's another 'Event' already being processed */
+
+    /* Using the queue library provides us with a DS that comes with pop_front and push_back
+     * functions to quickly meet the requirements for a FIFO queue */
+    queue<Event> buffer;
 };
 
 int main() {
