@@ -59,6 +59,8 @@ int main() {
         /* Construct a new object and push it into the GEL */
         GEL.emplace_back(arrival_time, ARRIVAL);
     }
+    /* #### We need to sort the GEL before doing anything else!!!! ####*/
+
 
     /* Base template provided in the prompt
 
