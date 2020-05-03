@@ -1,26 +1,26 @@
-#define ARRIVAL     "ARRIVAL"
-#define DERPARTURE  "DEPARTURE"
-
 #include <iostream>
 #include <string>
 #include <list>
 #include <queue>
+#include <cmath>
 
 using namespace std;
 
+#define ARRIVAL     "ARRIVAL"
+#define DERPARTURE  "DEPARTURE"
+
 /* Below is just a skeleton and template. Feel free to propose changes
  * or ask any questions. */
-
-/* An idea I have is to use the vector library instead of manually creating
- * a linked list since vectors already have a built in class/struct with
- * functions. Also from what I've read in piazza, it seems like we are able
- * to use structures provided by the libraries as long as they aren't "exotic" */
 
 struct Event
 {
     /* We can rename the variables later to be shorter if needed */
     int event_time;
     string event_type;
+
+    /* As stated in the prompt it should have pointers to the next and previous events */
+    Event* next;
+    Event* prev;
 };
 
 struct GEL {
@@ -39,6 +39,19 @@ struct Queue {
 };
 
 int main() {
+    /* Initializing */
+    unsigned int length = 0, time = 0;
+
+    /* Lambda will be a different value with every run so that we can gather data to plot our graph */
+    /* Lambda and mu values are found in the 3.7 Experiment section of the project. */
+    unsigned int lambda = 0.1, mu = 1;
+
+    /* Generate the random events and add them to our GEL. */
+    int arrival_time, process_time;
+    for (int i = 0; i < 1000; ++i) {
+        negative_exponentially_distributed_time(lambda);
+        negative_exponentially_distributed_time(mu);
+    }
     /* Base template provided in the prompt
 
     Initialize;
@@ -51,4 +64,11 @@ int main() {
 
     */
    return 0;
+}
+
+double negative_exponentially_distributed_time (double rate)  
+{
+    double u;
+    u = drand48();
+    return ((-1/rate)*log(1-u)); 
 }
