@@ -6,17 +6,18 @@
 
 using namespace std;
 
-#define ARRIVAL     "ARRIVAL"
-#define DERPARTURE  "DEPARTURE"
+typedef enum {
+	ARRIVAL = 0,
+	DEPARTURE = 1
+} EVENT_TYPE;
 
 /* Below is just a skeleton and template. Feel free to propose changes
  * or ask any questions. */
 
-struct Event
-{
+struct Event {
     /* We can rename the variables later to be shorter if needed */
-    int event_time;
-    string event_type;
+    unsigned int event_time;
+    EVENT_TYPE event_type;
 
     /* As stated in the prompt it should have pointers to the next and previous events */
     Event* next;
