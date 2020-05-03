@@ -53,7 +53,6 @@ int main() {
     /* Generate the random events all as arrival at first. */
     /* We will handle process + departure time in the main loop. */
     int arrival_time;
-    Event* event;
     for (int i = 0; i < 1000; ++i) {
         arrival_time = negative_exponentially_distributed_time(lambda);
 
