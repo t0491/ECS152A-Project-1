@@ -42,7 +42,7 @@ unsigned int PROCESSING = 0;
 unsigned int MAX_BUFFER = 10;
 
 /* maximum steps to run the simulation for */
-unsigned int MAX_STEPS = 100000;
+unsigned int MAX_STEPS = 500000;
 
 /* UTILIZATION */
 double UTILIZATION = 0;
@@ -64,6 +64,9 @@ double PACKETS_DROPPED = 0;
 
 /* Mean length */
 double NQ = 0;
+
+/* Keeps track of how many packets were queued in the queue at any moment and sums it all up */
+unsigned int total_queued = 0;
 
 /* return negative exponentially distributed time with parameter rate */
 double neg_exp_dist_time(double rate) {
@@ -194,6 +197,8 @@ void process_arrival_event(Event *event, double lambda, double mu) {
 			PACKET_BUFFER.push(event->packet);
 			std::cout << PACKET_BUFFER.size() << "\n";
 			std::cout << MAX_BUFFER << "\n";
+
+			total_queued += PACKET_BUFFER.size();
 		} else { /* queue is full */
 			/* TODO record packet drop */
 			PACKETS_DROPPED += 1;
@@ -223,6 +228,8 @@ void process_departure_event(Event *event, double mu) {
 		/* create departure event for dequeued packet */
 		Event *departure_event = create_event(mu, DEPARTURE, packet);
 		GEL.push_back(departure_event);
+
+		total_queued += PACKET_BUFFER.size();
 	}
 }
 
@@ -241,12 +248,13 @@ int main(int argc, char **argv) {
 	GEL.push_back(first_event);
 	debug("first");
 
+	int numA = 0, numD = 0;
 	/* start simulation loop */
 	for (unsigned int i = 0; i <= MAX_STEPS; i++) {
 		/* get first element in GEL */
 		Event *event = GEL.front();
 		GEL.pop_front();
-
+		
         /* Copy the current time into previous before its updated for the next event */
         PREVIOUS_TIME = CURRENT_TIME;
 
@@ -258,8 +266,10 @@ int main(int argc, char **argv) {
 		/* process first element in GEL depending on its type */
 		if (event->type == ARRIVAL) {
 			process_arrival_event(event, lambda, mu);
+			++numA;
 		} else if (event->type == DEPARTURE) {
 			process_departure_event(event, mu);
+			++numD;
 		}
 
         /* Update the prev queue length so that it will be used at the start of next iteration */
@@ -299,6 +309,10 @@ int main(int argc, char **argv) {
      * our simulated average # of packets in queue */
     double simulated_nq = SUM_OF_AREAS / CURRENT_TIME;
     std::cout << "SIMULATED NQ: " << simulated_nq << "\n";
+	std::cout << "Sum of queued: " << total_queued << "\n"; 
+	std::cout << "OTHER NQ: " << ((double) total_queued/ (double) MAX_STEPS) << "\n";
+	std::cout << "Num Arrival Events: " << numA << "\n";
+	std::cout << "Num Departure Events: " << numD << "\n";
 
 	/* free the allocated memory for each packet */
 	for (auto packet : PACKETS) {
