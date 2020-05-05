@@ -44,8 +44,17 @@ unsigned int MAX_BUFFER = 10;
 /* maximum steps to run the simulation for */
 unsigned int MAX_STEPS = 100;
 
+/* UTILIZATION */
+double UTILIZATION = 0;
+
 /* global clock */
 double CURRENT_TIME = 0;
+
+/* Packets dropped */
+double PACKETS_DROPPED = 0;
+
+/* Mean length */
+double NQ = 0;
 
 /* return negative exponentially distributed time with parameter rate */
 double neg_exp_dist_time(double rate) {
@@ -70,6 +79,7 @@ Packet *create_packet(double mu) {
 }
 
 void print_packet(Packet *packet) {
+	UTILIZATION += packet->service_time;
 	std::cout << "[packet " << packet << "] ";
 	std::cout << "service_time=" << packet->service_time << "\n";
 }
@@ -83,6 +93,15 @@ void print_queue(std::queue<Packet *> queue) {
 		print_packet(packet);
 				copy.pop();
 	}
+}
+
+int mean_length(double p) {
+	double NQ = 0;
+	double Numerator = p*p;
+	double Denominator = 1-p;
+
+	NQ = Numerator/Denominator;
+	return NQ;  
 }
 
 /* create a new event pointing to given packet */
@@ -163,10 +182,12 @@ void process_arrival_event(Event *event, double lambda, double mu) {
 		if (PACKET_BUFFER.empty() ||  PACKET_BUFFER.size() - 1 < MAX_BUFFER) {
 			/* queue is not full, push packet in queue */
 			PACKET_BUFFER.push(event->packet);
+			std::cout << PACKET_BUFFER.size() << "\n";
+			std::cout << MAX_BUFFER << "\n";
 		} else { /* queue is full */
 			/* TODO record packet drop */
+			PACKETS_DROPPED += 1;
 			/* TODO update mean queue length */
-			/* TODO update server busy time */
 		}
 	}
 }
@@ -197,7 +218,7 @@ void process_departure_event(Event *event, double mu) {
 
 int main(int argc, char **argv) {
 	/* initialize variables */
-    double lambda = 0.1; /* arrival rate */
+    	double lambda = 0.1; /* arrival rate */
 	double mu = 1; /* service rate */
 
 	/* create first packet */
@@ -242,6 +263,17 @@ int main(int argc, char **argv) {
 	for (auto event : EVENTS) {
 		print_event(event);
 	}
+	/* How many packets have been dropped so far */
+	std::cout << "PACKETS_DROPPED: " <<  PACKETS_DROPPED << "\n";
+
+	/* Server busy time (UTILIZATION) */
+	std::cout << "UTILIZATION: " << UTILIZATION << "\n";	
+	std::cout << "TIME ELAPSED: " << CURRENT_TIME << "\n";
+	std::cout << "MEAN SERVER UTILIZATION: " << UTILIZATION / CURRENT_TIME << "\n";
+	
+	NQ = mean_length(lambda/mu);
+	/* Packet Mean Length */
+	std::cout << "NQ: " << NQ; 	
 
 	/* free the allocated memory for each packet */
 	for (auto packet : PACKETS) {
