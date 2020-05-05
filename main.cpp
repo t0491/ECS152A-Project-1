@@ -42,13 +42,22 @@ unsigned int PROCESSING = 0;
 unsigned int MAX_BUFFER = 10;
 
 /* maximum steps to run the simulation for */
-unsigned int MAX_STEPS = 100;
+unsigned int MAX_STEPS = 100000;
 
 /* UTILIZATION */
 double UTILIZATION = 0;
 
 /* global clock */
 double CURRENT_TIME = 0;
+
+/* reference to previous event */
+double PREVIOUS_TIME = 0;
+
+/* Previous queue length */
+unsigned int PREV_QUEUE_LENGTH = 0;
+
+/* Sum of the area under the curve for every event/iteration we do */
+double SUM_OF_AREAS = 0;
 
 /* Packets dropped */
 double PACKETS_DROPPED = 0;
@@ -75,11 +84,12 @@ Packet *create_packet(double mu) {
 
 	PACKETS.push_back(packet);
 
+    /* Update server busy time when a new packet w/ processing time is generated */
+    UTILIZATION += packet->service_time;
 	return packet;
 }
 
 void print_packet(Packet *packet) {
-	UTILIZATION += packet->service_time;
 	std::cout << "[packet " << packet << "] ";
 	std::cout << "service_time=" << packet->service_time << "\n";
 }
@@ -95,7 +105,7 @@ void print_queue(std::queue<Packet *> queue) {
 	}
 }
 
-int mean_length(double p) {
+double mean_length(double p) {
 	double NQ = 0;
 	double Numerator = p*p;
 	double Denominator = 1-p;
@@ -218,7 +228,7 @@ void process_departure_event(Event *event, double mu) {
 
 int main(int argc, char **argv) {
 	/* initialize variables */
-    	double lambda = 0.1; /* arrival rate */
+    double lambda = 0.9; /* arrival rate */
 	double mu = 1; /* service rate */
 
 	/* create first packet */
@@ -237,8 +247,13 @@ int main(int argc, char **argv) {
 		Event *event = GEL.front();
 		GEL.pop_front();
 
+        /* Copy the current time into previous before its updated for the next event */
+        PREVIOUS_TIME = CURRENT_TIME;
+
 		/* set current time to event time */
 		CURRENT_TIME = event->time;
+
+        SUM_OF_AREAS += (CURRENT_TIME - PREVIOUS_TIME) * PREV_QUEUE_LENGTH;
 
 		/* process first element in GEL depending on its type */
 		if (event->type == ARRIVAL) {
@@ -246,6 +261,9 @@ int main(int argc, char **argv) {
 		} else if (event->type == DEPARTURE) {
 			process_departure_event(event, mu);
 		}
+
+        /* Update the prev queue length so that it will be used at the start of next iteration */
+        PREV_QUEUE_LENGTH = PACKET_BUFFER.size();
 
 		/* sort GEL by event time */
 		GEL.sort(sort_events);
@@ -267,13 +285,20 @@ int main(int argc, char **argv) {
 	std::cout << "PACKETS_DROPPED: " <<  PACKETS_DROPPED << "\n";
 
 	/* Server busy time (UTILIZATION) */
-	std::cout << "UTILIZATION: " << UTILIZATION << "\n";	
-	std::cout << "TIME ELAPSED: " << CURRENT_TIME << "\n";
-	std::cout << "MEAN SERVER UTILIZATION: " << UTILIZATION / CURRENT_TIME << "\n";
+	std::cout << "TIME SPENT BUSY: " << UTILIZATION << "\n";	
+	std::cout << "TOTAL TIME ELAPSED: " << CURRENT_TIME << "\n";
+    std::cout << "THEORETICAL UTILIZATION: " << lambda/mu << "\n";
+	std::cout << "SIMULATED (MEAN) UTILIZATION: " << UTILIZATION / CURRENT_TIME << "\n";
 	
 	NQ = mean_length(lambda/mu);
 	/* Packet Mean Length */
-	std::cout << "NQ: " << NQ; 	
+	std::cout << "THEORETICAL NQ: " << NQ << "\n"; 	
+
+    /* Current time right now should be the "total time" since the simulation is now fully over once we
+     * have exited the loop. So we divide the sum of areas under the curve by current_time to get 
+     * our simulated average # of packets in queue */
+    double simulated_nq = SUM_OF_AREAS / CURRENT_TIME;
+    std::cout << "SIMULATED NQ: " << simulated_nq << "\n";
 
 	/* free the allocated memory for each packet */
 	for (auto packet : PACKETS) {
@@ -287,5 +312,3 @@ int main(int argc, char **argv) {
 
    	return 0;
 }
-
-
