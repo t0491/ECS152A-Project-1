@@ -171,7 +171,7 @@ void debug(std::string message) {
  *			push packet pointed by arrival event into queue
  */
 void process_arrival_event(Event *event, double lambda, double mu) {
-	std::cout << "PROCESS ARRIVAL EVENT\n";
+	//std::cout << "PROCESS ARRIVAL EVENT\n";
 	/* create next packet */
 	Packet *next_packet = create_packet(mu);
 
@@ -193,8 +193,8 @@ void process_arrival_event(Event *event, double lambda, double mu) {
 		if (PACKET_BUFFER.empty() ||  PACKET_BUFFER.size() - 1 < MAX_BUFFER) {
 			/* queue is not full, push packet in queue */
 			PACKET_BUFFER.push(event->packet);
-			std::cout << PACKET_BUFFER.size() << "\n";
-			std::cout << MAX_BUFFER << "\n";
+			//std::cout << PACKET_BUFFER.size() << "\n";
+			//std::cout << MAX_BUFFER << "\n";
 
 		} else { /* queue is full */
 			/* TODO record packet drop */
@@ -210,7 +210,7 @@ void process_arrival_event(Event *event, double lambda, double mu) {
  * 		create departure event for that packet
  */
 void process_departure_event(Event *event, double mu) {
-	std::cout << "PROCESS DEPARTURE EVENT\n";
+	//std::cout << "PROCESS DEPARTURE EVENT\n";
 	/* indicate that the server is not processing */
 	PROCESSING = 0;
 
